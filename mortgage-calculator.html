@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mortgage Calculator</title>
+  <style>
+    body {
+      max-width: 520px;
+      margin: 40px auto;
+      padding: 0 16px;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      color: #222;
+    }
+
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: bold;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      font: inherit;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    #result.error {
+      color: #b00020;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Mortgage Calculator</h1>
+    <p>Enter your loan details to estimate the monthly payment.</p>
+
+    <form id="calculator">
+      <label for="loanAmount">Loan amount ($)</label>
+      <input id="loanAmount" type="number" min="0" step="0.01"
+             inputmode="decimal" placeholder="For example, 250000" required>
+
+      <label for="interestRate">Annual interest rate (%)</label>
+      <input id="interestRate" type="number" min="0" step="0.01"
+             inputmode="decimal" placeholder="For example, 6.5" required>
+
+      <label for="loanTerm">Loan term (years)</label>
+      <input id="loanTerm" type="number" min="0" step="1"
+             inputmode="numeric" placeholder="For example, 30" required>
+
+      <button type="submit">Calculate monthly payment</button>
+    </form>
+
+    <p id="result" aria-live="polite"></p>
+  </main>
+
+  <script>
+    const form = document.getElementById("calculator");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const loanAmount = Number(document.getElementById("loanAmount").value);
+      const annualRate = Number(document.getElementById("interestRate").value);
+      const loanTermYears = Number(document.getElementById("loanTerm").value);
+
+      // All three values must be greater than zero.
+      if (
+        !Number.isFinite(loanAmount) ||
+        !Number.isFinite(annualRate) ||
+        !Number.isFinite(loanTermYears) ||
+        loanAmount <= 0 ||
+        annualRate <= 0 ||
+        loanTermYears <= 0
+      ) {
+        result.textContent =
+          "Please select a loan amount, interest rate, or loan term greater than zero.";
+        result.className = "error";
+        return;
+      }
+
+      const monthlyRate = annualRate / 100 / 12;
+      const numberOfPayments = loanTermYears * 12;
+
+      // Standard fixed-rate mortgage payment calculation.
+      const monthlyPayment =
+        loanAmount *
+        monthlyRate /
+        (1 - Math.pow(1 + monthlyRate, -numberOfPayments));
+
+      result.textContent =
+        "Estimated monthly payment: " +
+        new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD"
+        }).format(monthlyPayment);
+
+      result.className = "";
+    });
+  </script>
+</body>
+</html>
