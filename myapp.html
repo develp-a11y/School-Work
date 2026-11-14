@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mortgage Calculator</title>
+  <style>
+    body {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      color: #222;
+      background: #f5f7fa;
+    }
+
+    main {
+      padding: 24px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px #00000018;
+    }
+
+    h1 { margin-top: 0; }
+
+    .control {
+      margin: 24px 0;
+    }
+
+    label, output {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    #payment {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+
+    #error {
+      color: #b00020;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Mortgage Calculator</h1>
+
+    <div class="control">
+      <label for="loanAmount">Loan amount</label>
+      <output id="loanAmountValue" for="loanAmount"></output>
+      <input id="loanAmount" type="range" min="0" max="1000000" step="1000" value="300000">
+    </div>
+
+    <div class="control">
+      <label for="interestRate">Interest rate</label>
+      <output id="interestRateValue" for="interestRate"></output>
+      <input id="interestRate" type="range" min="0" max="15" step="0.01" value="6.5">
+    </div>
+
+    <div class="control">
+      <label for="loanTerm">Loan term in years</label>
+      <output id="loanTermValue" for="loanTerm"></output>
+      <input id="loanTerm" type="range" min="0" max="40" step="1" value="30">
+    </div>
+
+    <h2>Estimated monthly payment</h2>
+    <p id="payment" aria-live="polite"></p>
+    <p id="error" role="alert"></p>
+  </main>
+
+  <script>
+    const amountSlider = document.getElementById("loanAmount");
+    const rateSlider = document.getElementById("interestRate");
+    const termSlider = document.getElementById("loanTerm");
+
+    const amountValue = document.getElementById("loanAmountValue");
+    const rateValue = document.getElementById("interestRateValue");
+    const termValue = document.getElementById("loanTermValue");
+    const paymentDisplay = document.getElementById("payment");
+    const errorDisplay = document.getElementById("error");
+
+    const currency = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD"
+    });
+
+    function calculatePayment() {
+      const amount = Number(amountSlider.value);
+      const annualRate = Number(rateSlider.value);
+      const years = Number(termSlider.value);
+
+      amountValue.textContent = currency.format(amount);
+      rateValue.textContent = annualRate + "%";
+      termValue.textContent = years + (years === 1 ? " year" : " years");
+
+      // Require all three values to be greater than zero.
+      if (amount <= 0 || annualRate <= 0 || years <= 0) {
+        paymentDisplay.textContent = "";
+        errorDisplay.textContent =
+          "Please select a loan amount, interest rate, and loan term greater than zero.";
+        return;
+      }
+
+      const monthlyRate = annualRate / 100 / 12;
+      const numberOfPayments = years * 12;
+
+      // Standard fixed-rate mortgage payment formula.
+      const monthlyPayment =
+        amount * monthlyRate /
+        (1 - Math.pow(1 + monthlyRate, -numberOfPayments));
+
+      errorDisplay.textContent = "";
+      paymentDisplay.textContent = currency.format(monthlyPayment);
+    }
+
+    amountSlider.addEventListener("input", calculatePayment);
+    rateSlider.addEventListener("input", calculatePayment);
+    termSlider.addEventListener("input", calculatePayment);
+
+    calculatePayment();
+  </script>
+</body>
+</html>
